@@ -1,0 +1,252 @@
+Step 1: Install Dependencies
+npm install next-auth@beta @auth/prisma-adapter @prisma/client bcryptjs
+npm install -D prisma @types/bcryptjs
+
+Step 2: Setup Prisma
+Initialize Prisma
+npx prisma init
+
+
+Configure prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "mysql", "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  accounts      Account[]
+  sessions      Session[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+
+
+
+
+Step 3: Environment Variables
+Create/update .env:
+
+env
+
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/mydb"
+
+# Auth.js
+AUTH_SECRET="your-secret-key-generate-with-openssl"
+# AUTH_URL="http://localhost:3000" # Optional in development
+
+# Google OAuth
+AUTH_GOOGLE_ID="your-google-client-id"
+AUTH_GOOGLE_SECRET="your-google-client-secret"
+
+# GitHub OAuth
+AUTH_GITHUB_ID="your-github-client-id"
+AUTH_GITHUB_SECRET="your-github-client-secret"
+
+
+
+Step 4: Create Prisma Client
+Create lib/prisma.ts:
+
+import { PrismaClient } from '@prisma/client'
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: ['query'],
+})
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+
+
+Generate AUTH_SECRET:
+npx auth secret
+
+
+
+Step 5: Run Prisma Migration
+npx prisma migrate dev --name init
+npx prisma generate
+
+
+Step 6: Configure Auth.js
+Create auth.ts in the root directory:
+
+
+Step 7: Create Auth Route Handler
+Create app/api/auth/[...nextauth]/route.ts:
+
+import { handlers } from "@/auth"
+export const { GET, POST } = handlers
+
+
+Step 8: Create Registration API
+Create app/api/register/route.ts:
+
+
+Step 9: Update TypeScript Types
+Create types/next-auth.d.ts:
+
+
+Step 10: Create Middleware for Protected Routes
+Create middleware.ts in root:
+
+
+Step 11: Create Sign In Page
+Create app/auth/signin/page.tsx:
+
+
+Step 12: Create Sign Up Page
+Create app/auth/signup/page.tsx:
+
+
+Step 13: Create Dashboard (Protected Page)
+Create app/dashboard/page.tsx:
+
+
+Step 14: Create Sign Out Component
+Create components/SignOutButton.tsx:
+
+
+Step 15: Server-Side Session Access
+For server components:
+
+import { auth } from "@/auth"
+
+export default async function SomeServerComponent() {
+  const session = await auth()
+  
+  return (
+    <div>
+      {session ? (
+        <p>Welcome {session.user?.name}</p>
+      ) : (
+        <p>Please sign in</p>
+      )}
+    </div>
+  )
+}
+
+For client components:
+'use client'
+
+import { useSession } from "next-auth/react"
+
+export default function SomeClientComponent() {
+  const { data: session, status } = useSession()
+  
+  if (status === "loading") return <div>Loading...</div>
+  
+  return (
+    <div>
+      {session ? (
+        <p>Welcome {session.user?.name}</p>
+      ) : (
+        <p>Please sign in</p>
+      )}
+    </div>
+  )
+}
+
+
+
+
+Step 16: Setup OAuth Apps (Same as before)
+
+Google OAuth
+Go to Google Cloud Console (https://console.cloud.google.com)
+Create OAuth 2.0 credentials
+Add redirect URI: http://localhost:3000/api/auth/callback/google
+
+GitHub OAuth
+Go to GitHub Developer Settings (https://github.com/settings/developers)
+Create OAuth App
+Add callback URL: http://localhost:3000/api/auth/callback/github
+
+Step 17: Run Application
+Bash
+
+npm run dev
+
+
+
+
+
+
+
+
+
+
+
+// Prisma Commands
+# Create a new migration
+npx prisma migrate dev --name add_password_field
+
+# Generate Prisma Client
+npx prisma generate
+
+Alternative - Reset Database (Development Only)
+# Reset database and apply all migrations
+npx prisma migrate reset
+
+# Or drop and recreate
+npx prisma db push
+
+# Open Prisma Studio to check
+npx prisma studio
+
+# Push schema directly (bypasses migration)
+npx prisma db push
