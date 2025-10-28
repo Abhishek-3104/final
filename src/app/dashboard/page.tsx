@@ -1,167 +1,324 @@
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import SignOutButton from "@/components/SignOutButton"
-import { Mail, MapPin, Package, BarChart3 } from "lucide-react"
+// app/dashboard/page.tsx
+"use client"
 
-export default async function DashboardPage() {
-  const session = await auth()
+import { motion } from 'framer-motion'
+import {
+  TrendingUp,
+  TrendingDown,
+  Trash2,
+  MapPin,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Package,
+  Activity,
+  DollarSign,
+  Users,
+  BarChart3
+} from 'lucide-react'
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend
+} from 'recharts'
 
-  if (!session?.user) {
-    redirect("/auth/signin")
+const stats = [
+  {
+    name: 'Total Collections',
+    value: '2,543',
+    change: '+12.5%',
+    trend: 'up',
+    icon: Trash2,
+    color: 'from-lime-500 to-emerald-500'
+  },
+  {
+    name: 'Active Routes',
+    value: '48',
+    change: '+3.2%',
+    trend: 'up',
+    icon: MapPin,
+    color: 'from-blue-500 to-cyan-500'
+  },
+  {
+    name: 'Fill Rate',
+    value: '67%',
+    change: '-5.1%',
+    trend: 'down',
+    icon: Package,
+    color: 'from-purple-500 to-pink-500'
+  },
+  {
+    name: 'Cost Savings',
+    value: '$12.4K',
+    change: '+18.2%',
+    trend: 'up',
+    icon: DollarSign,
+    color: 'from-orange-500 to-red-500'
   }
+]
 
+const collectionData = [
+  { name: 'Mon', collections: 65, optimal: 45 },
+  { name: 'Tue', collections: 78, optimal: 52 },
+  { name: 'Wed', collections: 90, optimal: 68 },
+  { name: 'Thu', collections: 81, optimal: 70 },
+  { name: 'Fri', collections: 95, optimal: 75 },
+  { name: 'Sat', collections: 72, optimal: 50 },
+  { name: 'Sun', collections: 45, optimal: 30 }
+]
+
+const wasteTypeData = [
+  { name: 'General Waste', value: 45, color: '#84cc16' },
+  { name: 'Recyclables', value: 30, color: '#22d3ee' },
+  { name: 'Organic', value: 15, color: '#a78bfa' },
+  { name: 'Hazardous', value: 10, color: '#fb923c' }
+]
+
+const recentAlerts = [
+  { id: 1, type: 'warning', message: 'Container #A234 at 95% capacity', time: '5 min ago', location: 'Downtown District' },
+  { id: 2, type: 'success', message: 'Route optimization completed', time: '15 min ago', location: 'All Districts' },
+  { id: 3, type: 'error', message: 'Sensor malfunction detected', time: '1 hour ago', location: 'Bin #B567' },
+  { id: 4, type: 'info', message: 'Scheduled maintenance today', time: '2 hours ago', location: 'West Zone' }
+]
+
+const topRoutes = [
+  { id: 1, name: 'Route A-12', efficiency: 94, collections: 45, status: 'active' },
+  { id: 2, name: 'Route B-08', efficiency: 89, collections: 38, status: 'active' },
+  { id: 3, name: 'Route C-15', efficiency: 85, collections: 42, status: 'completed' },
+  { id: 4, name: 'Route D-03', efficiency: 78, collections: 35, status: 'active' }
+]
+
+export default function DashboardPage() {
   return (
-    <div className="min-h-screen w-full bg-[#111827] relative">
-      {/* Lime Radial Glow Background */}
-      <div
-        className="absolute inset-0 z-0 opacity-70"
-        style={{
-          backgroundImage: `radial-gradient(circle 800px at 50% 100px, rgba(132,204,22,0.15), transparent), radial-gradient(circle 600px at 80% 50%, rgba(56,189,248,0.1), transparent)`,
-          backgroundSize: "cover",
-        }}
-      />
-      
-      {/* Subtle Grid Pattern */}
-      <div className="absolute inset-0 z-0 opacity-5"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-          backgroundSize: "40px 40px",
-        }}
-      />
-
+    <div className="space-y-8">
       {/* Header */}
-      <header className="bg-[#1f2937]/90 backdrop-blur-md shadow-md border-b border-gray-700 relative z-10">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex-shrink-0">
-              <a href="/" className="text-2xl font-bold bg-gradient-to-r from-lime-400 via-lime-300 to-emerald-400 bg-clip-text text-transparent">
-                WasteSmart
-              </a>
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-2">Dashboard Overview</h1>
+        <p className="text-gray-400">Welcome back! Here's what's happening with your waste management today.</p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <motion.div
+            key={stat.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.1 }}
+            className="bg-[#1f2937]/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-lime-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-lime-900/10"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}>
+                <stat.icon className="w-6 h-6 text-white" />
+              </div>
+              <div className={`flex items-center gap-1 text-sm font-semibold ${
+                stat.trend === 'up' ? 'text-green-400' : 'text-red-400'
+              }`}>
+                {stat.trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                {stat.change}
+              </div>
             </div>
             <div>
-              <SignOutButton />
+              <p className="text-gray-400 text-sm mb-1">{stat.name}</p>
+              <p className="text-3xl font-bold text-white">{stat.value}</p>
             </div>
-          </div>
-        </nav>
-      </header>
+          </motion.div>
+        ))}
+      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-        <div className="bg-[#1f2937] rounded-3xl shadow-xl p-8 border border-gray-700/50">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl text-white font-bold bg-clip-text">
-              Welcome back, {session.user.name || 'User'}! 👋
-            </h1>
-            <p className="text-gray-400 mt-2">Here's your dashboard overview</p>
+      {/* Charts Row */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Collection Trends */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="bg-[#1f2937]/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-semibold text-white mb-1">Collection Trends</h3>
+              <p className="text-sm text-gray-400">Weekly overview</p>
+            </div>
+            <Activity className="w-5 h-5 text-lime-400" />
           </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={collectionData}>
+              <defs>
+                <linearGradient id="colorCollections" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#84cc16" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#84cc16" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey="name" stroke="#9ca3af" />
+              <YAxis stroke="#9ca3af" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1f2937',
+                  border: '1px solid #374151',
+                  borderRadius: '0.5rem',
+                  color: '#fff'
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="collections"
+                stroke="#84cc16"
+                strokeWidth={2}
+                fill="url(#colorCollections)"
+              />
+              <Area
+                type="monotone"
+                dataKey="optimal"
+                stroke="#22d3ee"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                fill="none"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </motion.div>
 
-          {/* User Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-[#2d3748] to-[#374151] p-6 rounded-2xl border border-gray-700/50 hover:border-lime-600/30 transition-colors duration-300">
-              <div className="flex items-center gap-4">
-                {session.user.image ? (
-                  <img 
-                    src={session.user.image} 
-                    alt="Profile" 
-                    className="w-16 h-16 rounded-full ring-4 ring-lime-900/30"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-lime-500 to-emerald-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                    {session.user.name?.charAt(0) || session.user.email?.charAt(0)}
+        {/* Waste Distribution */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="bg-[#1f2937]/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-semibold text-white mb-1">Waste Distribution</h3>
+              <p className="text-sm text-gray-400">By category</p>
+            </div>
+            <BarChart3 className="w-5 h-5 text-lime-400" />
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={wasteTypeData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {wasteTypeData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1f2937',
+                  border: '1px solid #374151',
+                  borderRadius: '0.5rem',
+                  color: '#fff'
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </motion.div>
+      </div>
+
+      {/* Bottom Row */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Recent Alerts */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+          className="bg-[#1f2937]/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-white">Recent Alerts</h3>
+            <AlertCircle className="w-5 h-5 text-lime-400" />
+          </div>
+          <div className="space-y-4">
+            {recentAlerts.map((alert) => (
+              <div
+                key={alert.id}
+                className="flex items-start gap-4 p-4 rounded-xl bg-[#2d3748]/50 hover:bg-[#2d3748] transition-colors"
+              >
+                <div className={`p-2 rounded-lg ${
+                  alert.type === 'error' ? 'bg-red-500/20 text-red-400' :
+                  alert.type === 'warning' ? 'bg-yellow-500/20 text-yellow-400' :
+                  alert.type === 'success' ? 'bg-green-500/20 text-green-400' :
+                  'bg-blue-500/20 text-blue-400'
+                }`}>
+                  {alert.type === 'error' && <AlertCircle className="w-5 h-5" />}
+                  {alert.type === 'warning' && <Clock className="w-5 h-5" />}
+                  {alert.type === 'success' && <CheckCircle className="w-5 h-5" />}
+                  {alert.type === 'info' && <Activity className="w-5 h-5" />}
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-medium mb-1">{alert.message}</p>
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <span>{alert.time}</span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {alert.location}
+                    </span>
                   </div>
-                )}
-                <div>
-                  <p className="text-sm text-gray-400">Name</p>
-                  <p className="text-lg font-semibold text-white">{session.user.name || 'N/A'}</p>
                 </div>
               </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-[#2d3748] to-[#374151] p-6 rounded-2xl border border-gray-700/50 hover:border-lime-600/30 transition-colors duration-300">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-lime-500 to-emerald-500 flex items-center justify-center shadow-lg">
-                  <Mail className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Email</p>
-                  <p className="text-lg font-semibold text-white">{session.user.email}</p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
+        </motion.div>
 
-          {/* Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-lime-600 to-emerald-600 p-6 rounded-2xl text-white hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 hover:-translate-y-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-lime-100 text-sm">Active Routes</p>
-                  <p className="text-3xl font-bold mt-2">12</p>
-                </div>
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <MapPin className="w-8 h-8" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-[#374151] to-[#1f2937] p-6 rounded-2xl text-white border border-lime-600/20 hover:shadow-lg hover:shadow-lime-900/10 transition-all duration-300 hover:-translate-y-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-300 text-sm">Waste Bins</p>
-                  <p className="text-3xl font-bold mt-2">248</p>
-                </div>
-                <div className="bg-gradient-to-br from-lime-500 to-emerald-500 p-3 rounded-xl">
-                  <Package className="w-8 h-8" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-emerald-600 to-lime-600 p-6 rounded-2xl text-white hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 hover:-translate-y-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-emerald-100 text-sm">Collections Today</p>
-                  <p className="text-3xl font-bold mt-2">34</p>
-                </div>
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <BarChart3 className="w-8 h-8" />
-                </div>
-              </div>
-            </div>
+        {/* Top Routes */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+          className="bg-[#1f2937]/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-white">Top Performing Routes</h3>
+            <MapPin className="w-5 h-5 text-lime-400" />
           </div>
-
-          {/* Activity Section */}
-          <div className="mt-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-white">Recent Activity</h2>
-              <button className="text-lime-400 hover:text-lime-300 text-sm font-medium transition-colors duration-300">
-                View All
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              {[
-                { title: "Route #128 Completed", time: "Today, 2:34 PM", status: "Completed", icon: MapPin },
-                { title: "New Waste Bin Registered", time: "Yesterday, 10:15 AM", status: "Added", icon: Package },
-                { title: "Weekly Report Generated", time: "May 24, 2024", status: "Generated", icon: BarChart3 }
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center gap-4 p-4 rounded-xl bg-[#2d3748] border border-gray-700/50 hover:border-lime-600/30 transition-all duration-300">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-lime-500/20 to-emerald-500/20 text-lime-400">
-                    <activity.icon className="w-5 h-5" />
+          <div className="space-y-4">
+            {topRoutes.map((route) => (
+              <div
+                key={route.id}
+                className="flex items-center justify-between p-4 rounded-xl bg-[#2d3748]/50 hover:bg-[#2d3748] transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-lime-500 to-emerald-500 flex items-center justify-center text-white font-bold">
+                    {route.efficiency}%
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-white font-medium">{activity.title}</h3>
-                    <p className="text-gray-400 text-sm">{activity.time}</p>
-                  </div>
-                  <div className="px-3 py-1 rounded-full bg-lime-500/10 text-lime-400 text-xs font-medium">
-                    {activity.status}
+                  <div>
+                    <p className="text-white font-semibold">{route.name}</p>
+                    <p className="text-sm text-gray-400">{route.collections} collections</p>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  route.status === 'active'
+                    ? 'bg-green-500/20 text-green-400'
+                    : 'bg-gray-500/20 text-gray-400'
+                }`}>
+                  {route.status}
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </main>
+        </motion.div>
+      </div>
     </div>
   )
 }
